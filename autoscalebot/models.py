@@ -6,6 +6,17 @@ from autoscalebot import MissingParameter, TOO_LOW, JUST_RIGHT, TOO_HIGH
 from autoscalebot.logger import logger
 
 
+def heroku_from_key(api_key, **kwargs):
+    """Returns an authenticated Heroku instance, via API Key."""
+
+    h = heroku.Heroku(**kwargs)
+
+    # Login.
+    h.authenticate(api_key)
+
+    return h
+
+
 class HerokuAutoscaler(object):
 
     def __init__(self, settings, *args, **kwargs):
@@ -34,9 +45,10 @@ class HerokuAutoscaler(object):
     @property
     def heroku_app(self):
         if not hasattr(self, "_heroku_app"):
-            cloud = heroku.from_key(self.settings.HEROKU_API_KEY)
+            cloud = heroku_from_key(self.settings.HEROKU_API_KEY)
             self._heroku_app = cloud.apps[self.settings.HEROKU_APP_NAME]
         return self._heroku_app
+        
 
     def heroku_scale(self, dynos=None):
         try:
